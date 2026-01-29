@@ -4,126 +4,53 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ค้นหารหัสนักศึกษา</title>
+    <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
-    <h1>ค้นหารหัสนักศึกษา</h1>
+    <main>
+      <header>
+        <h1>ค้นหารหัสนักศึกษา</h1>
+      </header>
 
-    <form id="form" onsubmit="search(event)">
-      <label for="input">เลขบัตรประชาชน 13 หลัก</label>
-      <input
-        id="input"
-        type="text"
-        inputmode="numeric"
-        maxlength="13"
-        placeholder="เลขบัตรประชาชน"
-        autocomplete="off"
-      />
-      <button type="submit" id="btn">ค้นหา</button>
-      <p id="error" hidden></p>
-    </form>
+      <section>
+        <form id="form" class="search-form">
+          <label for="input">เลขบัตรประชาชน 13 หลัก</label>
+          <input
+            id="input"
+            type="text"
+            inputmode="numeric"
+            maxlength="13"
+            placeholder="เลขบัตรประชาชน"
+            autocomplete="off"
+          />
+          <button type="submit" id="btn">ค้นหา</button>
+          <p id="error" class="error-msg" hidden></p>
+        </form>
+      </section>
 
-    <div id="result"></div>
+      <section id="result" class="result-area"></section>
+    </main>
 
-    <script>
-      const API_URL =
-        "https://script.google.com/macros/s/AKfycbyJcgraL-b7XUxVsOAqoaWOPQwDxtf1xKs3MousYvpBAQdjRbb_zGJJ2fliSITxwlG3TA/exec";
+    <template id="tpl-found">
+      <div class="result-card">
+        <div>
+          <p class="field-label">ชื่อ-สกุล</p>
+          <p class="field-value" data-name></p>
+        </div>
+        <div>
+          <p class="field-label">รหัสนักศึกษา</p>
+          <p class="field-value" data-student-id></p>
+        </div>
+        <button type="button" class="copy-btn" data-copy>คัดลอกรหัส</button>
+      </div>
+    </template>
 
-      const input = document.getElementById("input");
-      const btn = document.getElementById("btn");
-      const errorEl = document.getElementById("error");
-      const resultEl = document.getElementById("result");
+    <template id="tpl-not-found">
+      <div class="not-found-card">
+        <p>ไม่พบข้อมูลนักศึกษาที่ตรงกับเลขบัตรนี้</p>
+      </div>
+    </template>
 
-      input.addEventListener("input", function () {
-        this.value = this.value.replaceAll(/\D/g, "").slice(0, 13);
-        errorEl.hidden = true;
-      });
-
-      async function search(e) {
-        e.preventDefault();
-        var id = input.value.trim();
-
-        if (id.length !== 13) {
-          errorEl.textContent = "กรุณากรอกเลขบัตรประชาชนให้ครบ 13 หลัก";
-          errorEl.hidden = false;
-          input.focus();
-          return;
-        }
-
-        btn.disabled = true;
-        btn.textContent = "กำลังค้นหา...";
-        errorEl.hidden = true;
-        clearResult();
-
-        try {
-          var res = await fetch(API_URL + "?cardId=" + encodeURIComponent(id));
-          var data = await res.json();
-
-          if (data.success) {
-            showFound(data.data);
-          } else if (data.error === "NOT_FOUND") {
-            showNotFound();
-          } else {
-            errorEl.textContent = data.message || "เกิดข้อผิดพลาด";
-            errorEl.hidden = false;
-          }
-        } catch (error) {
-          console.error(error);
-          errorEl.textContent = "ไม่สามารถเชื่อมต่อระบบได้ ลองใหม่อีกครั้ง";
-          errorEl.hidden = false;
-        } finally {
-          btn.disabled = false;
-          btn.textContent = "ค้นหา";
-        }
-      }
-
-      function showFound(data) {
-        var box = document.createElement("div");
-
-        var nameLabel = document.createElement("p");
-        nameLabel.textContent = "ชื่อ-สกุล";
-        box.appendChild(nameLabel);
-
-        var name = document.createElement("p");
-        name.textContent = data.name;
-        box.appendChild(name);
-
-        var idLabel = document.createElement("p");
-        idLabel.textContent = "รหัสนักศึกษา";
-        box.appendChild(idLabel);
-
-        var idVal = document.createElement("p");
-        idVal.textContent = data.studentId;
-        box.appendChild(idVal);
-
-        var copyBtn = document.createElement("button");
-        copyBtn.type = "button";
-        copyBtn.textContent = "คัดลอกรหัส";
-        copyBtn.addEventListener("click", function () {
-          navigator.clipboard.writeText(data.studentId).then(function () {
-            copyBtn.textContent = "คัดลอกแล้ว";
-            setTimeout(function () {
-              copyBtn.textContent = "คัดลอกรหัส";
-            }, 2000);
-          });
-        });
-        box.appendChild(copyBtn);
-
-        resultEl.appendChild(box);
-      }
-
-      function showNotFound() {
-        var box = document.createElement("div");
-        var msg = document.createElement("p");
-        msg.textContent = "ไม่พบข้อมูลนักศึกษาที่ตรงกับเลขบัตรนี้";
-        box.appendChild(msg);
-        resultEl.appendChild(box);
-      }
-
-      function clearResult() {
-        while (resultEl.firstChild) resultEl.firstChild.remove();
-      }
-
-      input.focus();
-    </script>
+    <script type="module" src="js/main.js"></script>
   </body>
 </html>
