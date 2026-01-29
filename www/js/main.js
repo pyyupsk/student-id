@@ -26,7 +26,7 @@ form.addEventListener("submit", async (e) => {
   }
 
   btn.disabled = true;
-  btn.textContent = "กำลังค้นหา...";
+  btn.textContent = "กำลังค้นหา…";
   errorEl.hidden = true;
   clearResult();
 
@@ -36,6 +36,7 @@ form.addEventListener("submit", async (e) => {
 
     if (data.success) {
       showFound(data.data);
+      input.value = "";
     } else if (data.error === "NOT_FOUND") {
       showNotFound();
     } else {
@@ -58,13 +59,21 @@ const showFound = (data) => {
   clone.querySelector("[data-student-id]").textContent = data.studentId;
 
   const copyBtn = clone.querySelector("[data-copy]");
-  copyBtn.addEventListener("click", () => {
-    navigator.clipboard.writeText(data.studentId).then(() => {
-      copyBtn.textContent = "คัดลอกแล้ว";
+  const copyText = clone.querySelector("[data-copy-text]");
+
+  copyBtn.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(data.studentId);
+      copyText.textContent = "คัดลอกแล้ว";
       setTimeout(() => {
-        copyBtn.textContent = "คัดลอกรหัส";
+        copyText.textContent = "คัดลอกรหัส";
       }, 2000);
-    });
+    } catch {
+      copyText.textContent = "คัดลอกไม่ได้";
+      setTimeout(() => {
+        copyText.textContent = "คัดลอกรหัส";
+      }, 2000);
+    }
   });
 
   resultEl.appendChild(clone);
@@ -77,5 +86,3 @@ const showNotFound = () => {
 const clearResult = () => {
   resultEl.replaceChildren();
 };
-
-input.focus();

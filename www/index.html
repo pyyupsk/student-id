@@ -3,7 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
     <title>ค้นหารหัสนักศึกษา</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
@@ -12,36 +19,51 @@
         <h1>ค้นหารหัสนักศึกษา</h1>
       </header>
 
-      <section>
-        <form id="form" class="search-form">
-          <label for="input">เลขบัตรประชาชน 13 หลัก</label>
-          <input
-            id="input"
-            type="text"
-            inputmode="numeric"
-            maxlength="13"
-            placeholder="เลขบัตรประชาชน"
-            autocomplete="off"
-          />
-          <button type="submit" id="btn">ค้นหา</button>
-          <p id="error" class="error-msg" hidden></p>
-        </form>
-      </section>
+      <form id="form" class="search-form">
+        <label for="input">เลขบัตรประชาชน 13 หลัก</label>
+        <input
+          id="input"
+          name="cardId"
+          type="text"
+          inputmode="numeric"
+          maxlength="13"
+          pattern="[0-9]{13}"
+          placeholder="กรอกเลขบัตรประชาชน"
+          autocomplete="off"
+          autofocus
+        />
+        <button type="submit" id="btn">ค้นหา</button>
+        <p
+          id="error"
+          class="error-msg"
+          role="alert"
+          aria-live="polite"
+          hidden
+        ></p>
+      </form>
 
-      <section id="result" class="result-area"></section>
+      <section id="result" class="result-area" aria-live="polite"></section>
     </main>
 
     <template id="tpl-found">
       <div class="result-card">
-        <div>
+        <div class="field">
           <p class="field-label">ชื่อ-สกุล</p>
           <p class="field-value" data-name></p>
         </div>
-        <div>
+        <hr />
+        <div class="field">
           <p class="field-label">รหัสนักศึกษา</p>
-          <p class="field-value" data-student-id></p>
+          <p class="field-value field-value--id" data-student-id></p>
         </div>
-        <button type="button" class="copy-btn" data-copy>คัดลอกรหัส</button>
+        <button
+          type="button"
+          class="copy-btn"
+          data-copy
+          aria-label="คัดลอกรหัสนักศึกษา"
+        >
+          <span data-copy-text>คัดลอกรหัส</span>
+        </button>
       </div>
     </template>
 
