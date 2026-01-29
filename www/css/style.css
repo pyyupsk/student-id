@@ -19,7 +19,11 @@
 }
 
 body {
-  font-family: "Noto Sans Thai", sans-serif;
+  font-family:
+    "Noto Sans Thai",
+    system-ui,
+    -apple-system,
+    sans-serif;
   color: var(--text);
   background: var(--bg);
   line-height: 1.6;
@@ -27,7 +31,6 @@ body {
   display: flex;
   justify-content: center;
   padding: 4rem 1rem 2rem;
-  -webkit-font-smoothing: antialiased;
 }
 
 main {
@@ -196,8 +199,8 @@ header h1 {
   *,
   *::before,
   *::after {
-    animation-duration: 0.01ms !important;
+    animation-duration: 0s !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    transition-duration: 0s !important;
   }
 }

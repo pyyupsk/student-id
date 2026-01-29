@@ -9,6 +9,8 @@ const resultEl = document.getElementById("result");
 const foundTpl = document.getElementById("tpl-found");
 const notFoundTpl = document.getElementById("tpl-not-found");
 
+let controller = null;
+
 input.addEventListener("input", () => {
   input.value = input.value.replaceAll(/\D/g, "").slice(0, 13);
   errorEl.hidden = true;
@@ -25,13 +27,21 @@ form.addEventListener("submit", async (e) => {
     return;
   }
 
+  if (controller) controller.abort();
+  controller = new AbortController();
+
   btn.disabled = true;
   btn.textContent = "กำลังค้นหา…";
   errorEl.hidden = true;
   clearResult();
 
   try {
-    const res = await fetch(`${API_URL}?cardId=${encodeURIComponent(id)}`);
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify({ cardId: id }),
+      signal: controller.signal,
+    });
     const data = await res.json();
 
     if (data.success) {
@@ -44,43 +54,47 @@ form.addEventListener("submit", async (e) => {
       errorEl.hidden = false;
     }
   } catch (err) {
+    if (err.name === "AbortError") return;
     console.error(err);
     errorEl.textContent = "ไม่สามารถเชื่อมต่อระบบได้ ลองใหม่อีกครั้ง";
     errorEl.hidden = false;
   } finally {
+    controller = null;
     btn.disabled = false;
     btn.textContent = "ค้นหา";
   }
+});
+
+resultEl.addEventListener("click", async (e) => {
+  const copyBtn = e.target.closest("[data-copy]");
+  if (!copyBtn) return;
+
+  const studentId = copyBtn
+    .closest(".result-card")
+    .querySelector("[data-student-id]").textContent;
+  const copyText = copyBtn.querySelector("[data-copy-text]");
+
+  try {
+    await navigator.clipboard.writeText(studentId);
+    copyText.textContent = "คัดลอกแล้ว";
+  } catch {
+    copyText.textContent = "คัดลอกไม่ได้";
+  }
+
+  setTimeout(() => {
+    copyText.textContent = "คัดลอกรหัส";
+  }, 2000);
 });
 
 const showFound = (data) => {
   const clone = foundTpl.content.cloneNode(true);
   clone.querySelector("[data-name]").textContent = data.name;
   clone.querySelector("[data-student-id]").textContent = data.studentId;
-
-  const copyBtn = clone.querySelector("[data-copy]");
-  const copyText = clone.querySelector("[data-copy-text]");
-
-  copyBtn.addEventListener("click", async () => {
-    try {
-      await navigator.clipboard.writeText(data.studentId);
-      copyText.textContent = "คัดลอกแล้ว";
-      setTimeout(() => {
-        copyText.textContent = "คัดลอกรหัส";
-      }, 2000);
-    } catch {
-      copyText.textContent = "คัดลอกไม่ได้";
-      setTimeout(() => {
-        copyText.textContent = "คัดลอกรหัส";
-      }, 2000);
-    }
-  });
-
-  resultEl.appendChild(clone);
+  resultEl.replaceChildren(clone);
 };
 
 const showNotFound = () => {
-  resultEl.appendChild(notFoundTpl.content.cloneNode(true));
+  resultEl.replaceChildren(notFoundTpl.content.cloneNode(true));
 };
 
 const clearResult = () => {
